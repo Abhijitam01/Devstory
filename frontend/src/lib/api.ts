@@ -1,9 +1,12 @@
 export type FileChange = { status: string; file: string };
 export type CommitItem = {
   commit: string;
+  fullSha?: string;
   author: string;
   date: string; // YYYY-MM-DD
+  timestamp?: string;
   message: string;
+  htmlUrl?: string;
   changes: FileChange[];
 };
 

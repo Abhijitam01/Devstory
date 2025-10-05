@@ -87,10 +87,12 @@ async function analyzeRepository(repoUrl, { token, maxCommits } = {}) {
     const files = Array.isArray(d.files) ? d.files : [];
     return {
       commit: (d.sha || '').slice(0, 7),
+      fullSha: d.sha || '',
       author: authorName,
       date,
       timestamp: dateIso,
       message,
+      htmlUrl: d.html_url || '',
       changes: files.map((f) => ({ status: statusToShort(f.status), file: f.filename })),
     };
   });

@@ -163,6 +163,52 @@ export async function getCommitDetails({
 }
 
 /**
+ * Gets file contents from GitHub
+ */
+export async function getFileContents({
+  owner,
+  repo,
+  path,
+  ref = 'HEAD',
+  token
+}: {
+  owner: string;
+  repo: string;
+  path: string;
+  ref?: string;
+  token?: string;
+}): Promise<{ content: string; encoding: string; size: number }> {
+  const headers = getAxiosHeaders(token);
+  
+  try {
+    const response = await axios.get(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+      { 
+        params: { ref },
+        headers,
+        timeout: 30000
+      }
+    );
+    
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const apiError: GitHubApiError = {
+        message: error.message,
+        status: error.response?.status,
+        response: error.response ? {
+          status: error.response.status,
+          statusText: error.response.statusText,
+          data: error.response.data
+        } : undefined
+      };
+      throw apiError;
+    }
+    throw error;
+  }
+}
+
+/**
  * Analyzes a GitHub repository and returns commit timeline
  */
 export async function analyzeRepository(

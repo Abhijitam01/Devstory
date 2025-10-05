@@ -46,6 +46,7 @@ export interface GitHubApiHeaders {
   'Accept': string;
   'Authorization'?: string;
   'User-Agent'?: string;
+  [key: string]: string | undefined;
 }
 
 export type {

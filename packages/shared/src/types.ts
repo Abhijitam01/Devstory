@@ -41,6 +41,12 @@ export type FileChangeStatus = 'A' | 'M' | 'D' | 'R' | 'C';
 export interface FileChange {
   status: FileChangeStatus;
   file: string;
+  additions?: number;
+  deletions?: number;
+  changes?: number;
+  patch?: string;
+  content?: string;
+  size?: number;
 }
 
 export interface CommitItem {
@@ -61,6 +67,47 @@ export interface AnalyzeResponse {
   repoUrl: string;
   count: number;
   commits: CommitItem[];
+  codebaseStats?: CodebaseStats;
+}
+
+export interface CodebaseStats {
+  totalFiles: number;
+  totalLines: number;
+  languages: LanguageStats[];
+  fileTypes: FileTypeStats[];
+  contributors: ContributorStats[];
+  commitFrequency: CommitFrequency;
+  averageCommitSize: number;
+  largestCommit: { sha: string; files: number; lines: number };
+  mostActiveDay: string;
+  mostActiveHour: number;
+}
+
+export interface LanguageStats {
+  language: string;
+  files: number;
+  lines: number;
+  percentage: number;
+}
+
+export interface FileTypeStats {
+  type: FileType;
+  count: number;
+  percentage: number;
+}
+
+export interface ContributorStats {
+  author: string;
+  commits: number;
+  linesAdded: number;
+  linesDeleted: number;
+  percentage: number;
+}
+
+export interface CommitFrequency {
+  daily: number;
+  weekly: number;
+  monthly: number;
 }
 
 export interface ApiError {

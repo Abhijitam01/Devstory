@@ -86,27 +86,6 @@ export function isValidGitHubUrl(url) {
     }
 }
 /**
- * Debounce function for input handling
- */
-export function debounce(func, wait) {
-    let timeout;
-    return (...args) => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func(...args), wait);
-    };
-}
-/**
- * Formats file size in human readable format
- */
-export function formatFileSize(bytes) {
-    if (bytes === 0)
-        return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
-/**
  * Gets relative time string (e.g., "2 hours ago")
  */
 export function getRelativeTime(dateString) {

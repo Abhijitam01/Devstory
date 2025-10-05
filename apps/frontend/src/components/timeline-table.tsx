@@ -17,12 +17,14 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { cn, formatDate, formatRelativeTime, getFileIcon } from '@/lib/utils';
-import { CommitItem, FileType, getFileType } from '@devstory/shared';
+import { CommitItem, FileType, getFileType, FileChange } from '@devstory/shared';
+import { FileViewer } from './file-viewer';
 
 interface TimelineTableProps {
   commits: CommitItem[];
   repoUrl: string;
   isLoading?: boolean;
+  onGetFileContent?: (file: FileChange) => Promise<void>;
 }
 
 const statusLabels: Record<string, string> = {
@@ -49,7 +51,7 @@ const typeColors: Record<FileType, string> = {
   Other: 'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-900/20 dark:text-slate-300 dark:border-slate-800',
 };
 
-export function TimelineTable({ commits, repoUrl, isLoading }: TimelineTableProps) {
+export function TimelineTable({ commits, repoUrl, isLoading, onGetFileContent }: TimelineTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState<FileType | 'all'>('all');
   const [expandedCommits, setExpandedCommits] = useState<Set<string>>(new Set());
@@ -270,22 +272,14 @@ export function TimelineTable({ commits, repoUrl, isLoading }: TimelineTableProp
                       </div>
 
                       {isExpanded && (
-                        <div className="space-y-1 pl-6 border-l-2 border-muted">
+                        <div className="space-y-4 pl-6 border-l-2 border-muted">
                           {commit.changes.map((change, idx) => (
-                            <div key={idx} className="flex items-center gap-2 py-1">
-                              <Badge 
-                                variant="outline" 
-                                className={cn('text-xs', statusColors[change.status])}
-                              >
-                                {statusLabels[change.status] || change.status}
-                              </Badge>
-                              <span className="text-sm text-muted-foreground mr-2">
-                                {getFileIcon(change.file)}
-                              </span>
-                              <code className="text-sm bg-muted px-2 py-1 rounded">
-                                {change.file}
-                              </code>
-                            </div>
+                            <FileViewer
+                              key={idx}
+                              file={change}
+                              commitSha={commit.commit}
+                              onGetContent={onGetFileContent}
+                            />
                           ))}
                         </div>
                       )}

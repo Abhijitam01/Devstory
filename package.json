@@ -9,12 +9,12 @@
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:frontend": "npm run dev --workspace=frontend",
-    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=@devstory/frontend",
+    "dev:backend": "npm run dev --workspace=@devstory/backend",
     "build": "npm run build --workspaces --if-present",
     "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
-    "start:frontend": "npm run start --workspace=frontend",
-    "start:backend": "npm run start --workspace=backend",
+    "start:frontend": "npm run start --workspace=@devstory/frontend",
+    "start:backend": "npm run start --workspace=@devstory/backend",
     "lint": "npm run lint --workspaces --if-present",
     "type-check": "npm run type-check --workspaces --if-present",
     "clean": "npm run clean --workspaces --if-present && rm -rf node_modules"

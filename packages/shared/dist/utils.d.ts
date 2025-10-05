@@ -24,15 +24,6 @@ export declare function getFirstLine(message: string): string;
  */
 export declare function isValidGitHubUrl(url: string): boolean;
 /**
- * Debounce function for input handling
- */
-export declare function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void;
-/**
- * Formats file size in human readable format
- */
-export declare function formatFileSize(bytes: number): string;
-/**
  * Gets relative time string (e.g., "2 hours ago")
  */
 export declare function getRelativeTime(dateString: string): string;
-//# sourceMappingURL=utils.d.ts.map

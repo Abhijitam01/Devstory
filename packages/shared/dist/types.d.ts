@@ -79,4 +79,3 @@ export type FileType = 'Backend' | 'Frontend' | 'Schema' | 'Infra' | 'Other';
 export interface FileTypeMapping {
     [key: string]: FileType;
 }
-//# sourceMappingURL=types.d.ts.map

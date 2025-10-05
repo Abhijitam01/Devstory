@@ -1,10 +1,12 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { formatDate as sharedFormatDate, getRelativeTime } from '@devstory/shared';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// Re-export shared utilities with frontend-specific formatting
 export function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -14,22 +16,16 @@ export function formatDate(dateString: string): string {
 }
 
 export function formatRelativeTime(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-  
-  if (diffInSeconds < 60) return 'just now';
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-  if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)}mo ago`;
-  return `${Math.floor(diffInSeconds / 31536000)}y ago`;
+  const relative = getRelativeTime(dateString);
+  // Convert to shorter format for UI
+  return relative
+    .replace(' minutes ago', 'm ago')
+    .replace(' hours ago', 'h ago')
+    .replace(' days ago', 'd ago')
+    .replace(' months ago', 'mo ago')
+    .replace(' years ago', 'y ago');
 }
 
-export function truncateText(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength) + '...';
-}
 
 export function getFileExtension(filename: string): string {
   return filename.split('.').pop()?.toLowerCase() || '';

@@ -3,17 +3,19 @@
 import { useState, useEffect } from 'react';
 import { RepositoryForm } from '@/components/repository-form';
 import { TimelineTable } from '@/components/timeline-table';
+import { CodebaseInsights } from '@/components/codebase-insights';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent } from '@/components/ui/card';
 import { analyzeRepo, checkApiHealth } from '@/lib/api';
-import { AnalyzeResponse } from '@devstory/shared';
-import { AlertCircle, CheckCircle, Github, TrendingUp, Clock, Users } from 'lucide-react';
+import { AnalyzeResponse, FileChange } from '@devstory/shared';
+import { AlertCircle, CheckCircle, Github, TrendingUp, Clock, Users, BarChart3 } from 'lucide-react';
 
 export default function Home() {
   const [data, setData] = useState<AnalyzeResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [apiStatus, setApiStatus] = useState<'checking' | 'online' | 'offline'>('checking');
+  const [showInsights, setShowInsights] = useState(false);
 
   useEffect(() => {
     // Check API health on mount
@@ -33,6 +35,7 @@ export default function Home() {
     setLoading(true);
     setError(null);
     setData(null);
+    setShowInsights(false);
 
     try {
       const result = await analyzeRepo(repoUrl, maxCommits);
@@ -41,6 +44,55 @@ export default function Home() {
       setError(err instanceof Error ? err.message : 'Failed to analyze repository');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGetFileContent = async (file: FileChange) => {
+    if (!data) return;
+    
+    try {
+      // Extract owner and repo from URL
+      const urlParts = data.repoUrl.replace('https://github.com/', '').split('/');
+      const [owner, repo] = urlParts;
+      
+      // Find the commit that contains this file
+      const commit = data.commits.find(c => 
+        c.changes.some(change => change.file === file.file)
+      );
+      
+      if (!commit) return;
+      
+      const response = await fetch(
+        `http://localhost:4000/api/commit/${owner}/${repo}/${commit.commit}?includeContent=true`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch file content');
+      }
+      
+      const commitDetails = await response.json();
+      const fileWithContent = commitDetails.files.find((f: any) => f.filename === file.file);
+      
+      if (fileWithContent && fileWithContent.content) {
+        // Update the file in the data
+        setData(prevData => {
+          if (!prevData) return prevData;
+          
+          return {
+            ...prevData,
+            commits: prevData.commits.map(c => ({
+              ...c,
+              changes: c.changes.map(change => 
+                change.file === file.file 
+                  ? { ...change, content: fileWithContent.content, size: fileWithContent.size }
+                  : change
+              )
+            }))
+          };
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch file content:', error);
     }
   };
 

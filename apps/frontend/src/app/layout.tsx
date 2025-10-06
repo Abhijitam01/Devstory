@@ -53,28 +53,45 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <div className="relative min-h-screen bg-background">
-          {/* Header */}
-          <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="container flex h-14 items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <h1 className="text-xl font-bold">DevStory</h1>
-                <span className="text-sm text-muted-foreground hidden sm:inline">
-                  GitHub Repository Timeline
-                </span>
+        <div className="relative min-h-screen bg-background flex flex-col">
+          {/* Header - Cursor-inspired */}
+          <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+            <div className="flex h-12 items-center justify-between px-4">
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-primary to-primary/70 flex items-center justify-center">
+                    <span className="text-primary-foreground font-bold text-sm">DS</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <h1 className="text-lg font-semibold leading-none">DevStory</h1>
+                    <span className="text-xs text-muted-foreground">
+                      GitHub Repository Timeline
+                    </span>
+                  </div>
+                </div>
               </div>
-              <ThemeToggle />
+              
+              <div className="flex items-center space-x-2">
+                <div className="cursor-status-bar">
+                  <div className="flex items-center space-x-4 text-xs">
+                    <span className="text-muted-foreground">Ready</span>
+                    <span className="text-muted-foreground">•</span>
+                    <span className="text-muted-foreground">TypeScript</span>
+                  </div>
+                </div>
+                <ThemeToggle />
+              </div>
             </div>
           </header>
 
-          {/* Main Content */}
-          <main className="container mx-auto px-4 py-8">
+          {/* Main Content - Cursor-inspired layout */}
+          <main className="flex-1 flex overflow-hidden">
             {children}
           </main>
 
-          {/* Footer */}
-          <footer className="border-t bg-background">
-            <div className="container py-6 text-center text-sm text-muted-foreground">
+          {/* Footer - Minimalist */}
+          <footer className="border-t bg-muted/30">
+            <div className="px-4 py-3 text-center text-xs text-muted-foreground">
               <p>
                 Built with ❤️ for developers who love to understand how projects evolve
               </p>

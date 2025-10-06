@@ -8,7 +8,7 @@ import { GlassCard } from '@/components/ui/glass-card';
 import { GradientButton } from '@/components/ui/gradient-button';
 import { analyzeRepo, checkApiHealth } from '@/lib/api';
 import { AnalyzeResponse, FileChange } from '@devstory/shared';
-import { BarChart3, ArrowLeft } from 'lucide-react';
+import { BarChart3, ArrowLeft, TrendingUp, Github, Clock, Users } from 'lucide-react';
 
 export default function Home() {
   const [data, setData] = useState<AnalyzeResponse | null>(null);

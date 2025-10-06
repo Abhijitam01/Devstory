@@ -41,6 +41,21 @@ module.exports = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        // Cursor-inspired semantic colors
+        editor: {
+          bg: 'hsl(var(--editor-bg))',
+          fg: 'hsl(var(--editor-fg))',
+        },
+        sidebar: {
+          bg: 'hsl(var(--sidebar-bg))',
+          fg: 'hsl(var(--sidebar-fg))',
+        },
+        panel: {
+          bg: 'hsl(var(--panel-bg))',
+          fg: 'hsl(var(--panel-fg))',
+        },
+        selection: 'hsl(var(--selection))',
+        hover: 'hsl(var(--hover))',
       },
       borderRadius: {
         lg: 'var(--radius)',

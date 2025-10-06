@@ -4,13 +4,14 @@
 
 @layer base {
   :root {
+    /* Light mode - Clean and modern */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 262.1 83.3% 57.8%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -22,19 +23,30 @@
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
+    --ring: 262.1 83.3% 57.8%;
+    --radius: 0.75rem;
+    
+    /* Cursor-inspired semantic colors */
+    --editor-bg: 0 0% 100%;
+    --editor-fg: 222.2 84% 4.9%;
+    --sidebar-bg: 210 40% 98%;
+    --sidebar-fg: 222.2 84% 4.9%;
+    --panel-bg: 210 40% 96%;
+    --panel-fg: 222.2 84% 4.9%;
+    --selection: 262.1 83.3% 57.8% / 0.15;
+    --hover: 210 40% 94%;
   }
 
   .dark {
+    /* Dark mode - Cursor-inspired with proper contrast */
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+    --card: 217.2 32.6% 10%;
     --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
+    --popover: 217.2 32.6% 10%;
     --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 262.1 83.3% 57.8%;
+    --primary-foreground: 210 40% 98%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
@@ -45,7 +57,17 @@
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 262.1 83.3% 57.8%;
+    
+    /* Cursor-inspired dark semantic colors */
+    --editor-bg: 222.2 84% 4.9%;
+    --editor-fg: 210 40% 98%;
+    --sidebar-bg: 217.2 32.6% 10%;
+    --sidebar-fg: 210 40% 98%;
+    --panel-bg: 217.2 32.6% 15%;
+    --panel-fg: 210 40% 98%;
+    --selection: 262.1 83.3% 57.8% / 0.2;
+    --hover: 217.2 32.6% 20%;
   }
 }
 
@@ -59,31 +81,121 @@
 }
 
 @layer components {
+  /* Cursor-inspired semantic classes */
+  .editor-bg {
+    background-color: hsl(var(--editor-bg));
+  }
+  
+  .editor-fg {
+    color: hsl(var(--editor-fg));
+  }
+  
+  .sidebar-bg {
+    background-color: hsl(var(--sidebar-bg));
+  }
+  
+  .sidebar-fg {
+    color: hsl(var(--sidebar-fg));
+  }
+  
+  .panel-bg {
+    background-color: hsl(var(--panel-bg));
+  }
+  
+  .panel-fg {
+    color: hsl(var(--panel-fg));
+  }
+  
+  .selection-bg {
+    background-color: hsl(var(--selection));
+  }
+  
+  .hover-bg {
+    background-color: hsl(var(--hover));
+  }
+
+  /* Enhanced glass effects with Cursor-inspired styling */
+  .cursor-glass {
+    backdrop-filter: blur(16px) saturate(180%);
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.125);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  }
+  
+  .dark .cursor-glass {
+    background: rgba(17, 25, 40, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.125);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+
+  /* Cursor-inspired button styles */
+  .cursor-button {
+    @apply relative overflow-hidden rounded-lg border border-border/50 bg-background/80 backdrop-blur-sm;
+    @apply transition-all duration-200 ease-out;
+    @apply hover:bg-accent/50 hover:border-border;
+    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
+  }
+  
+  .cursor-button:active {
+    @apply scale-95;
+  }
+
+  /* Enhanced hover effects */
+  .cursor-hover {
+    @apply transition-all duration-200 ease-out;
+    @apply hover:scale-[1.02] hover:-translate-y-0.5;
+    @apply hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20;
+  }
+  
+  .dark .cursor-hover:hover {
+    @apply hover:shadow-xl hover:shadow-black/30;
+  }
+
+  /* Code editor styling */
+  .code-editor {
+    @apply font-mono text-sm leading-relaxed;
+    @apply bg-editor-bg text-editor-fg;
+    @apply border border-border rounded-lg;
+    @apply p-4 overflow-auto;
+  }
+
+  /* Sidebar styling */
+  .cursor-sidebar {
+    @apply sidebar-bg sidebar-fg;
+    @apply border-r border-border;
+    @apply min-h-screen;
+  }
+
+  /* Panel styling */
+  .cursor-panel {
+    @apply panel-bg panel-fg;
+    @apply border border-border rounded-lg;
+    @apply p-4;
+  }
+
+  /* Selection styling */
+  .cursor-selection {
+    @apply selection-bg;
+    @apply rounded-sm;
+  }
+
+  /* Status bar styling */
+  .cursor-status-bar {
+    @apply bg-muted/50 border-t border-border;
+    @apply px-4 py-2 text-sm text-muted-foreground;
+    @apply flex items-center justify-between;
+  }
+
+  /* Legacy classes for backward compatibility */
   .gradient-bg {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
   }
   
   .glass-effect {
-    backdrop-filter: blur(10px);
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-  
-  .dark .glass-effect {
-    background: rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    @apply cursor-glass;
   }
   
   .hover-lift {
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  }
-  
-  .hover-lift:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  }
-  
-  .dark .hover-lift:hover {
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    @apply cursor-hover;
   }
 }

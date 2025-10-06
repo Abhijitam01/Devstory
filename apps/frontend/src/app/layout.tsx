@@ -1,9 +1,17 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { ThemeToggle } from '@/components/theme-toggle';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ 
+  subsets: ['latin'],
+  variable: '--font-sans',
+});
+
+const jetbrainsMono = JetBrains_Mono({ 
+  subsets: ['latin'],
+  variable: '--font-mono',
+});
 
 export const metadata: Metadata = {
   title: 'DevStory - GitHub Repository Timeline',
@@ -52,46 +60,37 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans`}>
         <div className="relative min-h-screen bg-background flex flex-col">
-          {/* Header - Cursor-inspired */}
-          <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
-            <div className="flex h-12 items-center justify-between px-4">
+          {/* Header - Simple and clean */}
+          <header className="sticky top-0 z-50 w-full border-b bg-background">
+            <div className="flex h-14 items-center justify-between px-6">
               <div className="flex items-center space-x-3">
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-primary to-primary/70 flex items-center justify-center">
-                    <span className="text-primary-foreground font-bold text-sm">DS</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <h1 className="text-lg font-semibold leading-none">DevStory</h1>
-                    <span className="text-xs text-muted-foreground">
-                      GitHub Repository Timeline
-                    </span>
-                  </div>
-                </div>
+                <h1 className="text-xl font-bold text-foreground">DevStory</h1>
+                <span className="text-sm text-muted-foreground hidden sm:inline">
+                  GitHub Repository Timeline
+                </span>
               </div>
               
-              <div className="flex items-center space-x-2">
-                <div className="cursor-status-bar">
-                  <div className="flex items-center space-x-4 text-xs">
-                    <span className="text-muted-foreground">Ready</span>
-                    <span className="text-muted-foreground">•</span>
-                    <span className="text-muted-foreground">TypeScript</span>
-                  </div>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-3 text-xs text-muted-foreground">
+                  <span>Ready</span>
+                  <span>•</span>
+                  <span>TypeScript</span>
                 </div>
                 <ThemeToggle />
               </div>
             </div>
           </header>
 
-          {/* Main Content - Cursor-inspired layout */}
-          <main className="flex-1 flex overflow-hidden">
+          {/* Main Content */}
+          <main className="flex-1">
             {children}
           </main>
 
-          {/* Footer - Minimalist */}
-          <footer className="border-t bg-muted/30">
-            <div className="px-4 py-3 text-center text-xs text-muted-foreground">
+          {/* Footer - Simple */}
+          <footer className="border-t bg-background">
+            <div className="px-6 py-4 text-center text-sm text-muted-foreground">
               <p>
                 Built with ❤️ for developers who love to understand how projects evolve
               </p>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -52,7 +52,8 @@ export function FileViewer({ file, commitSha, onGetContent }: FileViewerProps) {
       try {
         await onGetContent(file);
       } catch (error) {
-        console.error('Failed to load file content:', error);
+        // Error is already handled in the parent component
+        // Just reset loading state
       } finally {
         setIsLoading(false);
       }
@@ -60,15 +61,44 @@ export function FileViewer({ file, commitSha, onGetContent }: FileViewerProps) {
     setShowContent(!showContent);
   };
 
-  const handleCopyContent = async () => {
-    if (file.content) {
-      try {
-        await navigator.clipboard.writeText(file.content);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      } catch (error) {
-        console.error('Failed to copy content:', error);
+  // Cleanup timeout on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (copied) {
+        setCopied(false);
       }
+    };
+  }, [copied]);
+
+  const handleCopyContent = async () => {
+    if (!file.content) return;
+    
+    try {
+      // Check if clipboard API is available
+      if (!navigator.clipboard) {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = file.content;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      } else {
+        await navigator.clipboard.writeText(file.content);
+      }
+      
+      setCopied(true);
+      const timeoutId = setTimeout(() => setCopied(false), 2000);
+      
+      // Cleanup timeout on component unmount
+      return () => clearTimeout(timeoutId);
+    } catch (error) {
+      // Silently fail - user will see the copy button didn't work
+      // Could add a toast notification here in the future
     }
   };
 

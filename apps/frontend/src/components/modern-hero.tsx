@@ -30,9 +30,17 @@ export function ModernHero({ onAnalyze, isLoading, error, apiStatus }: ModernHer
   const [isValidUrl, setIsValidUrl] = useState(true);
 
   const validateUrl = (url: string) => {
+    if (!url || url.trim().length === 0) {
+      setIsValidUrl(true); // Don't show error for empty input
+      return true;
+    }
+    
     try {
       const parsed = new URL(url);
-      const isValid = parsed.hostname === 'github.com' && parsed.pathname.split('/').length >= 3;
+      const isValid = parsed.hostname === 'github.com' && 
+                     parsed.pathname.split('/').length >= 3 &&
+                     parsed.pathname.split('/')[1] && // owner exists
+                     parsed.pathname.split('/')[2]; // repo exists
       setIsValidUrl(isValid);
       return isValid;
     } catch {
@@ -111,7 +119,17 @@ export function ModernHero({ onAnalyze, isLoading, error, apiStatus }: ModernHer
                   min={1}
                   max={1000}
                   value={maxCommits ?? ''}
-                  onChange={(e) => setMaxCommits(e.target.value ? Number(e.target.value) : undefined)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      setMaxCommits(undefined);
+                    } else {
+                      const numValue = Number(value);
+                      if (!isNaN(numValue) && numValue >= 1 && numValue <= 1000) {
+                        setMaxCommits(numValue);
+                      }
+                    }
+                  }}
                   icon={<Code className="w-5 h-5" />}
                 />
               </div>

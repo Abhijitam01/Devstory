@@ -64,40 +64,31 @@ export function ModernHero({ onAnalyze, isLoading, error, apiStatus }: ModernHer
 
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900" />
-      
-      {/* Floating Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-20 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-pink-400/10 rounded-full blur-3xl animate-pulse delay-500" />
-      </div>
+      {/* Simple Background */}
+      <div className="absolute inset-0 bg-background" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center space-y-12">
           {/* Main Heading */}
           <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
               <Sparkles className="w-4 h-4" />
               AI-Powered Repository Analysis
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
-              <span className="bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 dark:from-white dark:via-blue-100 dark:to-purple-100 bg-clip-text text-transparent">
-                DevStory
-              </span>
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-foreground">
+              DevStory
             </h1>
             
-            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Discover the story behind every codebase. Analyze GitHub repositories with 
-              <span className="font-semibold text-blue-600 dark:text-blue-400"> AI-powered insights</span> and 
-              <span className="font-semibold text-purple-600 dark:text-purple-400"> beautiful visualizations</span>.
+              <span className="font-semibold text-primary"> AI-powered insights</span> and 
+              <span className="font-semibold text-primary"> beautiful visualizations</span>.
             </p>
           </div>
 
           {/* Repository Form */}
-          <GlassCard className="max-w-2xl mx-auto p-8">
+          <div className="max-w-2xl mx-auto p-8 simple-card">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
                 <FloatingInput
@@ -135,7 +126,7 @@ export function ModernHero({ onAnalyze, isLoading, error, apiStatus }: ModernHer
               </div>
 
               {error && (
-                <div className="p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300">
+                <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive">
                   {error}
                 </div>
               )}
@@ -166,67 +157,67 @@ export function ModernHero({ onAnalyze, isLoading, error, apiStatus }: ModernHer
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
             {stats.map((stat, index) => (
-              <GlassCard key={index} variant="subtle" className="p-6 text-center">
+              <div key={index} className="p-6 text-center simple-card">
                 <div className="space-y-2">
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary text-primary-foreground">
                     <stat.icon className="w-6 h-6" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    <div className="text-2xl font-bold text-foreground">
                       <AnimatedCounter value={stat.value} />
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                    <div className="text-sm text-muted-foreground">
                       {stat.label}
                     </div>
                   </div>
                 </div>
-              </GlassCard>
+              </div>
             ))}
           </div>
 
           {/* Features Preview */}
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <GlassCard variant="subtle" className="p-6">
+            <div className="p-6 simple-card">
               <div className="space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
-                  <Zap className="w-6 h-6 text-white" />
+                <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
+                  <Zap className="w-6 h-6 text-primary-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                <h3 className="text-lg font-semibold text-foreground">
                   Lightning Fast
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-muted-foreground">
                   Analyze repositories in seconds with our optimized GitHub API integration.
                 </p>
               </div>
-            </GlassCard>
+            </div>
 
-            <GlassCard variant="subtle" className="p-6">
+            <div className="p-6 simple-card">
               <div className="space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-                  <Code className="w-6 h-6 text-white" />
+                <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
+                  <Code className="w-6 h-6 text-primary-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                <h3 className="text-lg font-semibold text-foreground">
                   Deep Analysis
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-muted-foreground">
                   Get insights into code patterns, contributor activity, and development trends.
                 </p>
               </div>
-            </GlassCard>
+            </div>
 
-            <GlassCard variant="subtle" className="p-6">
+            <div className="p-6 simple-card">
               <div className="space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center">
-                  <Users className="w-6 h-6 text-white" />
+                <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
+                  <Users className="w-6 h-6 text-primary-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                <h3 className="text-lg font-semibold text-foreground">
                   Team Insights
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-muted-foreground">
                   Understand team dynamics and individual contributions to the project.
                 </p>
               </div>
-            </GlassCard>
+            </div>
           </div>
         </div>
       </div>

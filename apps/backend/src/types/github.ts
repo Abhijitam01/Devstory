@@ -16,6 +16,7 @@ export interface GitHubApiResponse<T> {
 export interface GitHubApiError {
   message: string;
   status?: number;
+  rateLimitReset?: string;
   response?: {
     status: number;
     statusText: string;

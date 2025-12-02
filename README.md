@@ -7,12 +7,20 @@ A modern web application that visualizes GitHub repository development history. 
 ## ✨ Features
 
 - **📊 Timeline Visualization** - See how your repository evolved over time
-- **👥 Contributor Insights** - Understand who contributed what and when
+- **📈 Codebase Statistics** - Comprehensive analytics including languages, file types, contributors, and commit patterns
+- **👥 Contributor Insights** - Understand who contributed what and when with avatars
 - **📁 File Analysis** - Categorize changes by type (Frontend, Backend, Infrastructure)
 - **🔍 Advanced Filtering** - Search commits, filter by file types, and sort results
+- **📄 Syntax Highlighting** - Beautiful code viewing with syntax highlighting
+- **💾 Export Functionality** - Export analysis data to CSV or JSON
+- **🔗 Share & Collaborate** - Share analysis results easily
+- **📑 Pagination** - Efficiently browse large repositories with pagination
+- **⚡ Performance Optimized** - Caching, lazy loading, and code splitting
 - **🌙 Dark Mode** - Beautiful dark and light themes
 - **📱 Responsive Design** - Works perfectly on desktop and mobile
-- **⚡ Real-time Analysis** - Fast GitHub API integration with rate limiting
+- **♿ Accessible** - Full keyboard navigation and screen reader support
+- **🔒 Secure** - Rate limiting, input validation, and security headers
+- **📝 Comprehensive Logging** - Structured logging for debugging and monitoring
 
 ## 🏗️ Architecture
 
@@ -103,6 +111,11 @@ devstory/
 - `npm run start` - Start all applications in production mode
 - `npm run lint` - Lint all applications
 - `npm run type-check` - Type check all applications
+- `npm test` - Run all tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage report
+- `npm run test:backend` - Run backend tests only
+- `npm run test:frontend` - Run frontend tests only
 
 ### Frontend Only
 - `npm run dev:frontend` - Start only the frontend
@@ -184,6 +197,34 @@ npm run build --workspace=backend
 3. Commit your changes: `git commit -m 'Add amazing feature'`
 4. Push to the branch: `git push origin feature/amazing-feature`
 5. Open a Pull Request
+
+## 📚 Documentation
+
+- [API Documentation](docs/API.md) - Complete API reference
+- [Architecture](docs/ARCHITECTURE.md) - System architecture and design
+- [Deployment Guide](docs/DEPLOYMENT.md) - How to deploy the application
+- [Changelog](docs/CHANGELOG.md) - List of changes and improvements
+- [Implementation Summary](docs/IMPLEMENTATION_SUMMARY.md) - Summary of all features
+
+## 🧪 Testing
+
+The project includes comprehensive testing infrastructure:
+
+```bash
+npm test              # Run all tests
+npm run test:watch    # Watch mode for development
+npm run test:coverage # Generate coverage report
+```
+
+## 🚀 CI/CD
+
+GitHub Actions workflow automatically:
+- Lints code
+- Type checks
+- Runs tests
+- Builds applications
+
+See `.github/workflows/ci.yml` for details.
 
 ## 📝 License
 

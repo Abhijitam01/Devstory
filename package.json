@@ -17,10 +17,21 @@
     "start:backend": "npm run start --workspace=@devstory/backend",
     "lint": "npm run lint --workspaces --if-present",
     "type-check": "npm run type-check --workspaces --if-present",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:backend": "jest --config apps/backend/jest.config.js",
+    "test:frontend": "jest --config jest.config.js",
     "clean": "npm run clean --workspaces --if-present && rm -rf node_modules"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^30.0.0",
     "concurrently": "^8.2.2",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
     "typescript": "^5.3.3"
   },
   "engines": {
@@ -37,5 +48,8 @@
     "typescript"
   ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@tanstack/react-virtual": "^3.13.12"
+  }
 }

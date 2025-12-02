@@ -52,6 +52,7 @@ export interface FileChange {
 export interface CommitItem {
   commit: string;
   author: string;
+  authorAvatar?: string;
   date: string; // YYYY-MM-DD
   timestamp: string; // ISO string
   message: string;
@@ -61,6 +62,8 @@ export interface CommitItem {
 export interface AnalyzeRequest {
   url: string;
   maxCommits?: number;
+  page?: number;
+  pageSize?: number;
 }
 
 export interface AnalyzeResponse {
@@ -68,6 +71,12 @@ export interface AnalyzeResponse {
   count: number;
   commits: CommitItem[];
   codebaseStats?: CodebaseStats;
+  pagination?: {
+    page: number;
+    pageSize: number;
+    totalPages: number;
+    totalCommits: number;
+  };
 }
 
 export interface CodebaseStats {

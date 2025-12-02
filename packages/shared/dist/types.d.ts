@@ -35,10 +35,17 @@ export type FileChangeStatus = 'A' | 'M' | 'D' | 'R' | 'C';
 export interface FileChange {
     status: FileChangeStatus;
     file: string;
+    additions?: number;
+    deletions?: number;
+    changes?: number;
+    patch?: string;
+    content?: string;
+    size?: number;
 }
 export interface CommitItem {
     commit: string;
     author: string;
+    authorAvatar?: string;
     date: string;
     timestamp: string;
     message: string;
@@ -47,11 +54,59 @@ export interface CommitItem {
 export interface AnalyzeRequest {
     url: string;
     maxCommits?: number;
+    page?: number;
+    pageSize?: number;
 }
 export interface AnalyzeResponse {
     repoUrl: string;
     count: number;
     commits: CommitItem[];
+    codebaseStats?: CodebaseStats;
+    pagination?: {
+        page: number;
+        pageSize: number;
+        totalPages: number;
+        totalCommits: number;
+    };
+}
+export interface CodebaseStats {
+    totalFiles: number;
+    totalLines: number;
+    languages: LanguageStats[];
+    fileTypes: FileTypeStats[];
+    contributors: ContributorStats[];
+    commitFrequency: CommitFrequency;
+    averageCommitSize: number;
+    largestCommit: {
+        sha: string;
+        files: number;
+        lines: number;
+    };
+    mostActiveDay: string;
+    mostActiveHour: number;
+}
+export interface LanguageStats {
+    language: string;
+    files: number;
+    lines: number;
+    percentage: number;
+}
+export interface FileTypeStats {
+    type: FileType;
+    count: number;
+    percentage: number;
+}
+export interface ContributorStats {
+    author: string;
+    commits: number;
+    linesAdded: number;
+    linesDeleted: number;
+    percentage: number;
+}
+export interface CommitFrequency {
+    daily: number;
+    weekly: number;
+    monthly: number;
 }
 export interface ApiError {
     error: string;

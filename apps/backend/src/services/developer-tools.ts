@@ -499,8 +499,10 @@ export function generateRecommendations(
 
   // Check for TypeScript
   const hasTypeScript = dependencies.some(dep => dep.name === 'typescript');
-  if (!hasTypeScript && packageJson.files?.some(f => f.endsWith('.ts'))) {
-    recommendations.push('Add TypeScript support for better type safety');
+  // Note: packageJson.files is not part of PackageJsonAnalysis type
+  // This check is skipped as we don't have access to file list here
+  if (!hasTypeScript) {
+    recommendations.push('Consider adding TypeScript support for better type safety');
   }
 
   // Check for testing

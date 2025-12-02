@@ -278,33 +278,80 @@ app.post('/api/analyze', analyzeRateLimiter.middleware(), validateAnalyzeRequest
     res.setHeader('X-Cache', 'MISS');
     res.json(response);
   } catch (error) {
-    logger.error('Analysis error', error instanceof Error ? error : new Error(String(error)), {
-      url: req.body?.url,
-      maxCommits: req.body?.maxCommits,
-    });
-    
+    // Better error logging and extraction
     let status = 500;
     let message = 'Internal server error';
     
+    // Handle GitHubApiError objects
     if (error && typeof error === 'object' && 'status' in error) {
-      status = error.status as number;
+      status = Number(error.status) || 500;
     }
     
-    if (error && typeof error === 'object' && 'message' in error) {
-      message = error.message as string;
+    // Extract message from various error types
+    if (error instanceof Error) {
+      message = error.message;
+    } else if (error && typeof error === 'object') {
+      if ('message' in error && typeof error.message === 'string') {
+        message = error.message;
+      } else if ('response' in error && error.response && typeof error.response === 'object') {
+        const response = error.response as any;
+        if (response.data && typeof response.data === 'object') {
+          if ('message' in response.data) {
+            message = String(response.data.message);
+          }
+        }
+        if (response.status) {
+          status = Number(response.status);
+        }
+      }
     }
+    
+    // Log the full error for debugging
+    const errorObj = error instanceof Error ? error : new Error(message);
+    logger.error('Analysis error', errorObj, {
+      status,
+      errorType: error?.constructor?.name,
+      errorDetails: error instanceof Error ? error.stack : JSON.stringify(error, null, 2),
+      url: req.body?.url,
+      maxCommits: req.body?.maxCommits,
+    });
     
     // Handle specific GitHub API errors with user-friendly messages
     if (status === 404) {
       message = 'Repository not found or is private. Please check the URL and ensure the repository is public.';
     } else if (status === 403) {
-      const rateLimitRemaining = error && typeof error === 'object' && 'response' in error
-        ? (error as any).response?.headers?.['x-ratelimit-remaining']
-        : null;
-      if (rateLimitRemaining === '0') {
-        message = 'GitHub API rate limit exceeded. Please wait a few minutes and try again, or add a GitHub token for higher limits.';
+      // Check for rate limit in error response
+      let rateLimitRemaining: string | null = null;
+      let rateLimitReset: string | null = null;
+      
+      if (error && typeof error === 'object') {
+        // Check in response headers
+        if ('response' in error && error.response && typeof error.response === 'object') {
+          const response = error.response as any;
+          if (response.headers) {
+            rateLimitRemaining = response.headers['x-ratelimit-remaining'] || 
+                                 response.headers['X-RateLimit-Remaining'];
+            rateLimitReset = response.headers['x-ratelimit-reset'] || 
+                            response.headers['X-RateLimit-Reset'];
+          }
+        }
+        // Check if it's a GitHubApiError with rateLimitReset
+        if ('rateLimitReset' in error && error.rateLimitReset) {
+          rateLimitReset = error.rateLimitReset as string;
+        }
+      }
+      
+      const remaining = rateLimitRemaining ? Number(rateLimitRemaining) : null;
+      if (remaining !== null && remaining === 0) {
+        if (rateLimitReset) {
+          const resetTime = new Date(rateLimitReset);
+          const minutesUntilReset = Math.ceil((resetTime.getTime() - Date.now()) / 60000);
+          message = `GitHub API rate limit exceeded. Rate limit resets in ${minutesUntilReset} minutes. Add a GitHub Personal Access Token to your .env file (GITHUB_TOKEN) for 5000 requests/hour instead of 60.`;
+        } else {
+          message = 'GitHub API rate limit exceeded. Please wait a few minutes and try again. Add a GitHub Personal Access Token to your .env file (GITHUB_TOKEN) for higher limits.';
+        }
       } else {
-        message = 'Access forbidden. The repository may be private or you may not have permission to access it.';
+        message = 'Access forbidden. The repository may be private or you may not have permission to access it. If this is a public repository, you may have hit the rate limit.';
       }
     } else if (status === 401) {
       message = 'Invalid GitHub token. Please check your GITHUB_TOKEN environment variable.';

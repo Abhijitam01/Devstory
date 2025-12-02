@@ -23,7 +23,7 @@ export function Footer() {
       { label: 'GitHub', href: 'https://github.com', icon: Github },
       { label: 'YouTube', href: 'https://youtube.com', icon: Youtube },
       { label: 'Discord', href: 'https://discord.com', icon: null },
-      { label: 'Email', href: 'mailto:contact@opensox.ai', icon: Mail },
+      { label: 'Email', href: 'mailto:contact@devstory.app', icon: Mail },
     ],
   };
 
@@ -35,16 +35,16 @@ export function Footer() {
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-purple-800 flex items-center justify-center">
-                <span className="text-white font-bold text-lg">O</span>
+                <span className="text-white font-bold text-lg">D</span>
               </div>
-              <span className="text-xl font-bold text-white">Opensox AI</span>
+              <span className="text-xl font-bold text-white">DevStory</span>
             </div>
-            <p className="text-white/70 text-sm">Search. Find. Contribute. Win</p>
+            <p className="text-white/70 text-sm">Visualize. Understand. Discover.</p>
             <div className="flex items-center space-x-2 text-white/60 text-sm">
               <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
-                <span className="text-xs">A</span>
+                <span className="text-xs">D</span>
               </div>
-              <span>Cooked by ajeetunc</span>
+              <span>Built for developers</span>
             </div>
           </div>
 
@@ -74,10 +74,10 @@ export function Footer() {
         {/* Bottom Section */}
         <div className="border-t border-white/10 pt-8 text-center space-y-2">
           <p className="text-white/70 text-sm">
-            © {currentYear} Opensox AI. All rights reserved.
+            © {currentYear} DevStory. All rights reserved.
           </p>
           <p className="text-white/60 text-xs">
-            Building 21st century open-source infrastructure
+            Visualizing how code evolves, one commit at a time
           </p>
         </div>
       </div>

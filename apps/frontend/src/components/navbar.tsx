@@ -46,11 +46,11 @@ export function Navbar() {
           <Link href="/" className="flex items-center space-x-3 group">
             <div className="relative">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-purple-800 flex items-center justify-center shadow-lg shadow-purple-500/50">
-                <span className="text-white font-bold text-lg">O</span>
+                <span className="text-white font-bold text-lg">D</span>
               </div>
               <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity blur-sm" />
             </div>
-            <span className="text-xl font-bold text-foreground">Opensox AI</span>
+            <span className="text-xl font-bold text-foreground">DevStory</span>
           </Link>
 
           {/* Desktop Navigation Links - Centered */}

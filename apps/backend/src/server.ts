@@ -1,8 +1,14 @@
 import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import { analyzeRepository, getCommitDetails, getFileContents, parseGithubRepoUrl } from './services/github';
+import { analyzeRepository, getCommitDetails, getFileContents, parseGithubRepoUrl, generateCodebaseStats } from './services/github';
+import { cache } from './services/cache';
 import { AnalyzeRequest, AnalyzeResponse, ApiError, ServerConfig } from '@devstory/shared';
+import { securityHeaders } from './middleware/security';
+import { apiRateLimiter, analyzeRateLimiter } from './middleware/rate-limit';
+import { validateAnalyzeRequest, validateCommitParams } from './middleware/validation';
+import { requestLogger, errorLogger } from './middleware/logging';
+import { logger } from './utils/logger';
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
@@ -15,28 +21,52 @@ const config: ServerConfig = {
 };
 
 // Middleware
+app.use(securityHeaders);
 app.use(cors({
   origin: config.corsOrigin || true,
   credentials: true
 }));
 
 app.use(express.json({ limit: '1mb' }));
+app.use(apiRateLimiter.middleware());
 
-// Request logging middleware (only in development)
-if (process.env.NODE_ENV === 'development') {
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-    next();
-  });
-}
+// Request logging middleware
+app.use(requestLogger);
 
 // Health check endpoint
-app.get('/health', (_req: Request, res: Response) => {
-  res.json({ 
-    ok: true, 
+app.get('/health', async (_req: Request, res: Response) => {
+  const health: Record<string, any> = {
+    ok: true,
     timestamp: new Date().toISOString(),
-    version: '1.0.0'
-  });
+    version: '1.0.0',
+    uptime: process.uptime(),
+    memory: {
+      used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+      total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
+    },
+    cache: cache.getStats(),
+  };
+
+  // Check GitHub API connectivity
+  try {
+    const testResponse = await fetch('https://api.github.com', {
+      method: 'HEAD',
+      headers: {
+        'User-Agent': 'DevStory/1.0.0',
+      },
+    });
+    health.githubApi = {
+      status: testResponse.status,
+      accessible: testResponse.ok,
+    };
+  } catch (error) {
+    health.githubApi = {
+      accessible: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+
+  res.json(health);
 });
 
 // API info endpoint
@@ -55,7 +85,7 @@ app.get('/api/info', (_req: Request, res: Response) => {
 });
 
 // Get detailed commit information with file contents
-app.get('/api/commit/:owner/:repo/:sha', async (req: Request, res: Response) => {
+app.get('/api/commit/:owner/:repo/:sha', validateCommitParams, async (req: Request, res: Response) => {
   try {
     const { owner, repo, sha } = req.params;
     const { includeContent } = req.query;
@@ -77,6 +107,9 @@ app.get('/api/commit/:owner/:repo/:sha', async (req: Request, res: Response) => 
 
     // If includeContent is true, fetch file contents
     if (includeContent === 'true' && commitDetails.files) {
+      const MAX_FILE_SIZE = 1024 * 1024; // 1MB limit
+      const MAX_FILE_SIZE_DISPLAY = 500 * 1024; // 500KB for display
+      
       const filesWithContent = await Promise.all(
         commitDetails.files.map(async (file) => {
           try {
@@ -89,8 +122,62 @@ app.get('/api/commit/:owner/:repo/:sha', async (req: Request, res: Response) => 
                 token: config.githubToken
               });
               
+              // Check file size
+              if (content.size > MAX_FILE_SIZE) {
+                return {
+                  ...file,
+                  size: content.size,
+                  content: undefined,
+                  error: `File too large (${(content.size / 1024).toFixed(0)}KB). Maximum size is ${(MAX_FILE_SIZE / 1024).toFixed(0)}KB.`
+                };
+              }
+              
+              // Check if file is binary (common binary extensions)
+              const binaryExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.ico', '.svg', '.pdf', 
+                                       '.zip', '.tar', '.gz', '.exe', '.dll', '.so', '.dylib',
+                                       '.woff', '.woff2', '.ttf', '.eot', '.otf', '.mp4', '.mp3',
+                                       '.mov', '.avi', '.webm', '.bin', '.dat'];
+              const isBinary = binaryExtensions.some(ext => 
+                file.filename.toLowerCase().endsWith(ext)
+              );
+              
+              if (isBinary) {
+                return {
+                  ...file,
+                  size: content.size,
+                  content: undefined,
+                  error: 'Binary file content cannot be displayed.'
+                };
+              }
+              
               // Decode base64 content
-              const decodedContent = Buffer.from(content.content, 'base64').toString('utf-8');
+              let decodedContent: string;
+              try {
+                decodedContent = Buffer.from(content.content, 'base64').toString('utf-8');
+                
+                // Check if decoded content is valid UTF-8 (basic check)
+                if (decodedContent.includes('\0') || decodedContent.length === 0) {
+                  return {
+                    ...file,
+                    size: content.size,
+                    content: undefined,
+                    error: 'File appears to be binary or invalid text format.'
+                  };
+                }
+                
+                // Limit content size for display
+                if (decodedContent.length > MAX_FILE_SIZE_DISPLAY) {
+                  decodedContent = decodedContent.substring(0, MAX_FILE_SIZE_DISPLAY) + 
+                    `\n\n... (File truncated. Total size: ${(content.size / 1024).toFixed(0)}KB)`;
+                }
+              } catch (decodeError) {
+                return {
+                  ...file,
+                  size: content.size,
+                  content: undefined,
+                  error: 'Failed to decode file content. File may be binary or corrupted.'
+                };
+              }
               
               return {
                 ...file,
@@ -101,7 +188,12 @@ app.get('/api/commit/:owner/:repo/:sha', async (req: Request, res: Response) => 
             return file;
           } catch (error) {
             // If we can't get content, return file without content
-            return file;
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            return {
+              ...file,
+              content: undefined,
+              error: `Failed to fetch file content: ${errorMessage}`
+            };
           }
         })
       );
@@ -111,9 +203,11 @@ app.get('/api/commit/:owner/:repo/:sha', async (req: Request, res: Response) => 
 
     res.json(commitDetails);
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Commit details error:', error);
-    }
+    logger.error('Commit details error', error instanceof Error ? error : new Error(String(error)), {
+      owner: req.params.owner,
+      repo: req.params.repo,
+      sha: req.params.sha,
+    });
     
     let status = 500;
     let message = 'Internal server error';
@@ -132,55 +226,62 @@ app.get('/api/commit/:owner/:repo/:sha', async (req: Request, res: Response) => 
 });
 
 // Main analysis endpoint
-app.post('/api/analyze', async (req: Request, res: Response) => {
+app.post('/api/analyze', analyzeRateLimiter.middleware(), validateAnalyzeRequest, async (req: Request, res: Response) => {
   try {
-    const { url, maxCommits }: AnalyzeRequest = req.body || {};
+    const { url, maxCommits, page, pageSize }: AnalyzeRequest & { page?: number; pageSize?: number } = req.body;
+
+    // Check cache first
+    const cacheKey = `${url}:${maxCommits || 'all'}`;
+    const cached = cache.get<AnalyzeResponse>(url, maxCommits);
     
-    // Validate input
-    if (!url || typeof url !== 'string') {
-      const error: ApiError = { 
-        error: 'Missing or invalid "url" in request body' 
-      };
-      return res.status(400).json(error);
-    }
-
-    // Validate URL format
-    try {
-      new URL(url);
-    } catch {
-      const error: ApiError = { 
-        error: 'Invalid URL format' 
-      };
-      return res.status(400).json(error);
-    }
-
-    // Validate maxCommits if provided
-    if (maxCommits !== undefined) {
-      if (typeof maxCommits !== 'number' || maxCommits < 1 || maxCommits > 1000) {
-        const error: ApiError = { 
-          error: 'maxCommits must be a number between 1 and 1000' 
-        };
-        return res.status(400).json(error);
-      }
+    if (cached) {
+      // Add cache headers
+      res.setHeader('X-Cache', 'HIT');
+      return res.json(cached);
     }
 
     // Analyze repository
-    const commits = await analyzeRepository(url, { 
+    const allCommits = await analyzeRepository(url, { 
       token: config.githubToken, 
       maxCommits 
     });
 
+    // Generate codebase statistics (from all commits, not just current page)
+    const codebaseStats = generateCodebaseStats(allCommits);
+
+    // Apply pagination if requested
+    const pageNum = page && page > 0 ? page : 1;
+    const size = pageSize && pageSize > 0 && pageSize <= 100 ? pageSize : 50;
+    const totalCommits = allCommits.length;
+    const totalPages = Math.ceil(totalCommits / size);
+    const startIndex = (pageNum - 1) * size;
+    const endIndex = startIndex + size;
+    const paginatedCommits = allCommits.slice(startIndex, endIndex);
+
     const response: AnalyzeResponse = {
       repoUrl: url,
-      count: commits.length,
-      commits
+      count: paginatedCommits.length,
+      commits: paginatedCommits,
+      codebaseStats,
+      pagination: {
+        page: pageNum,
+        pageSize: size,
+        totalPages,
+        totalCommits,
+      }
     };
 
+    // Cache the response (cache for 5 minutes)
+    cache.set(url, response, 5 * 60 * 1000);
+
+    // Add cache headers
+    res.setHeader('X-Cache', 'MISS');
     res.json(response);
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Analysis error:', error);
-    }
+    logger.error('Analysis error', error instanceof Error ? error : new Error(String(error)), {
+      url: req.body?.url,
+      maxCommits: req.body?.maxCommits,
+    });
     
     let status = 500;
     let message = 'Internal server error';
@@ -193,16 +294,29 @@ app.post('/api/analyze', async (req: Request, res: Response) => {
       message = error.message as string;
     }
     
-    // Handle specific GitHub API errors
+    // Handle specific GitHub API errors with user-friendly messages
     if (status === 404) {
-      message = 'Repository not found or is private';
+      message = 'Repository not found or is private. Please check the URL and ensure the repository is public.';
     } else if (status === 403) {
-      message = 'Rate limit exceeded or access forbidden';
+      const rateLimitRemaining = error && typeof error === 'object' && 'response' in error
+        ? (error as any).response?.headers?.['x-ratelimit-remaining']
+        : null;
+      if (rateLimitRemaining === '0') {
+        message = 'GitHub API rate limit exceeded. Please wait a few minutes and try again, or add a GitHub token for higher limits.';
+      } else {
+        message = 'Access forbidden. The repository may be private or you may not have permission to access it.';
+      }
     } else if (status === 401) {
-      message = 'Invalid GitHub token';
+      message = 'Invalid GitHub token. Please check your GITHUB_TOKEN environment variable.';
+    } else if (status === 422) {
+      message = 'Invalid repository URL or repository is empty. Please check the URL format.';
+    } else if (message.includes('timeout') || message.includes('ETIMEDOUT')) {
+      message = 'Request timed out. The repository may be too large. Try reducing maxCommits or try again later.';
+    } else if (message.includes('ENOTFOUND') || message.includes('ECONNREFUSED')) {
+      message = 'Network error. Please check your internet connection and try again.';
     }
     
-    const apiError: ApiError = { error: message };
+    const apiError: ApiError = { error: message, status };
     res.status(status).json(apiError);
   }
 });
@@ -216,10 +330,8 @@ app.use('*', (req: Request, res: Response) => {
 });
 
 // Global error handler
+app.use(errorLogger);
 app.use((error: Error, req: Request, res: Response, _next: NextFunction) => {
-  if (process.env.NODE_ENV === 'development') {
-    console.error('Unhandled error:', error);
-  }
   const apiError: ApiError = { 
     error: 'Internal server error' 
   };
@@ -228,6 +340,11 @@ app.use((error: Error, req: Request, res: Response, _next: NextFunction) => {
 
 // Start server
 app.listen(config.port, () => {
+  logger.info('Server started', {
+    port: config.port,
+    environment: process.env.NODE_ENV || 'development',
+  });
+  
   if (process.env.NODE_ENV === 'development') {
     console.log(`🚀 DevStory backend server listening on port ${config.port}`);
     console.log(`📊 Health check: http://localhost:${config.port}/health`);

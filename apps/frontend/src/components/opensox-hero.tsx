@@ -22,29 +22,29 @@ export function OpensoxHero() {
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="space-y-8">
-          {/* Backed by Users Badge */}
+          {/* Welcome Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
-            <span className="text-white/80 text-sm">Backed by</span>
-            <div className="w-5 h-5 rounded bg-orange-500 flex items-center justify-center">
-              <span className="text-white font-bold text-xs">U</span>
+            <span className="text-white/80 text-sm">Welcome to</span>
+            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center">
+              <span className="text-white font-bold text-xs">D</span>
             </div>
-            <span className="text-white/80 text-sm">sers</span>
+            <span className="text-white font-bold text-sm">DevStory</span>
           </div>
 
           {/* Main Headline */}
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white leading-tight">
-            Find your perfect
+            Visualize Your
             <br />
-            <span className="bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-              Open-Source
+            <span className="bg-gradient-to-r from-purple-300 via-purple-200 to-white bg-clip-text text-transparent">
+              Code Evolution
             </span>
             <br />
-            Repo
+            <span className="text-4xl md:text-6xl lg:text-7xl">Timeline</span>
           </h1>
 
           {/* Description */}
           <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
-            Find top open-source repos in seconds. Filter by your language, framework, or niche. Start contributing in seconds, not hours.
+            Analyze GitHub repositories. Understand how projects evolve. Discover development patterns with beautiful timeline visualizations.
           </p>
 
           {/* CTA Button */}

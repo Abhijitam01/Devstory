@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { cn, getFileIcon } from '@/lib/utils';
 import { FileChange } from '@devstory/shared';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface FileViewerProps {
   file: FileChange;
@@ -164,6 +166,8 @@ export function FileViewer({ file, commitSha, onGetContent }: FileViewerProps) {
     const lines = content.split('\n');
     const ext = getFileExtension(filename);
     const language = getLanguageFromExtension(ext);
+    // Check for dark mode
+    const isDark = typeof window !== 'undefined' && document.documentElement.classList.contains('dark');
 
     return (
       <div className="relative">
@@ -199,18 +203,25 @@ export function FileViewer({ file, commitSha, onGetContent }: FileViewerProps) {
           </div>
         </div>
         <div className="max-h-96 overflow-auto">
-          <pre className="text-sm p-4 bg-background">
-            <code>
-              {lines.map((line, index) => (
-                <div key={index} className="flex">
-                  <span className="text-muted-foreground select-none pr-4 w-12 text-right">
-                    {index + 1}
-                  </span>
-                  <span className="flex-1">{line}</span>
-                </div>
-              ))}
-            </code>
-          </pre>
+          <SyntaxHighlighter
+            language={language}
+            style={isDark ? oneDark : oneLight}
+            customStyle={{
+              margin: 0,
+              padding: '1rem',
+              background: 'transparent',
+              fontSize: '0.875rem',
+            }}
+            showLineNumbers
+            lineNumberStyle={{
+              minWidth: '3em',
+              paddingRight: '1em',
+              color: 'var(--muted-foreground)',
+              userSelect: 'none',
+            }}
+          >
+            {content}
+          </SyntaxHighlighter>
         </div>
       </div>
     );

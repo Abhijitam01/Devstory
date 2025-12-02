@@ -37,10 +37,10 @@ export function ModernHero({ onAnalyze, isLoading, error, apiStatus }: ModernHer
     
     try {
       const parsed = new URL(url);
-      const isValid = parsed.hostname === 'github.com' && 
+      const isValid = !!(parsed.hostname === 'github.com' && 
                      parsed.pathname.split('/').length >= 3 &&
                      parsed.pathname.split('/')[1] && // owner exists
-                     parsed.pathname.split('/')[2]; // repo exists
+                     parsed.pathname.split('/')[2]); // repo exists
       setIsValidUrl(isValid);
       return isValid;
     } catch {
@@ -55,11 +55,12 @@ export function ModernHero({ onAnalyze, isLoading, error, apiStatus }: ModernHer
     await onAnalyze(repoUrl.trim(), maxCommits);
   };
 
+  // Realistic stats - removed fake numbers, will show actual data when available
   const stats = [
-    { label: 'Repositories Analyzed', value: 12547, icon: Github },
-    { label: 'Commits Processed', value: 2847392, icon: Code },
-    { label: 'Active Users', value: 8943, icon: Users },
-    { label: 'Lines of Code', value: 156789432, icon: TrendingUp },
+    { label: 'Open Source', value: '100%', icon: Github, description: 'Free & open source' },
+    { label: 'Fast Analysis', value: '< 5s', icon: Zap, description: 'Quick repository insights' },
+    { label: 'GitHub API', value: 'Powered', icon: Code, description: 'Direct GitHub integration' },
+    { label: 'Real-time', value: 'Live', icon: TrendingUp, description: 'Up-to-date data' },
   ];
 
   return (
@@ -71,24 +72,22 @@ export function ModernHero({ onAnalyze, isLoading, error, apiStatus }: ModernHer
         <div className="text-center space-y-12">
           {/* Main Heading */}
           <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-              <Sparkles className="w-4 h-4" />
-              AI-Powered Repository Analysis
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-foreground/20 text-foreground text-xs font-medium uppercase tracking-wide">
+              <Code className="w-3.5 h-3.5" />
+              GitHub Repository Analysis
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-foreground">
+            <h1 className="text-6xl md:text-8xl font-bold tracking-tighter text-foreground modern-heading">
               DevStory
             </h1>
             
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Discover the story behind every codebase. Analyze GitHub repositories with 
-              <span className="font-semibold text-primary"> AI-powered insights</span> and 
-              <span className="font-semibold text-primary"> beautiful visualizations</span>.
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-light">
+              Analyze GitHub repositories. Understand code evolution. Discover development patterns.
             </p>
           </div>
 
           {/* Repository Form */}
-          <div className="max-w-2xl mx-auto p-8 simple-card">
+          <GlassCard className="max-w-2xl mx-auto p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
                 <FloatingInput
@@ -126,8 +125,25 @@ export function ModernHero({ onAnalyze, isLoading, error, apiStatus }: ModernHer
               </div>
 
               {error && (
-                <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive">
-                  {error}
+                <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive space-y-2">
+                  <div className="font-semibold">Error</div>
+                  <div>{error}</div>
+                  {error.toLowerCase().includes('rate limit') && (
+                    <div className="text-sm text-destructive/80 mt-2 space-y-1">
+                      <div>💡 Tip: Add a GitHub Personal Access Token to your backend .env file for higher rate limits (5000/hour vs 60/hour).</div>
+                      <div>⏰ The request will automatically retry with exponential backoff.</div>
+                    </div>
+                  )}
+                  {error.includes('not found') && (
+                    <div className="text-sm text-destructive/80 mt-2">
+                      💡 Tip: Make sure the repository URL is correct and the repository is public.
+                    </div>
+                  )}
+                  {error.includes('connect to server') && (
+                    <div className="text-sm text-destructive/80 mt-2">
+                      💡 Tip: Make sure the backend server is running on port 4000.
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -137,6 +153,7 @@ export function ModernHero({ onAnalyze, isLoading, error, apiStatus }: ModernHer
                 loading={isLoading}
                 disabled={!repoUrl.trim() || !isValidUrl}
                 className="w-full"
+                aria-label="Analyze GitHub repository"
               >
                 {isLoading ? (
                   <>
@@ -155,20 +172,25 @@ export function ModernHero({ onAnalyze, isLoading, error, apiStatus }: ModernHer
           </GlassCard>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
             {stats.map((stat, index) => (
-              <div key={index} className="p-6 text-center simple-card">
-                <div className="space-y-2">
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary text-primary-foreground">
-                    <stat.icon className="w-6 h-6" />
+              <div key={index} className="p-6 text-center modern-card">
+                <div className="space-y-3">
+                  <div className="inline-flex items-center justify-center w-10 h-10 rounded-md border border-foreground/20">
+                    <stat.icon className="w-5 h-5 text-foreground" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-foreground">
-                      <AnimatedCounter value={stat.value} />
+                    <div className="text-xl font-semibold text-foreground mb-1">
+                      {stat.value}
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
                       {stat.label}
                     </div>
+                    {stat.description && (
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {stat.description}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -176,45 +198,45 @@ export function ModernHero({ onAnalyze, isLoading, error, apiStatus }: ModernHer
           </div>
 
           {/* Features Preview */}
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <div className="p-6 simple-card">
+          <div className="grid md:grid-cols-3 gap-4 max-w-3xl mx-auto">
+            <div className="p-6 modern-card">
               <div className="space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
-                  <Zap className="w-6 h-6 text-primary-foreground" />
+                <div className="w-10 h-10 rounded-md border border-foreground/20 flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">
-                  Lightning Fast
+                <h3 className="text-base font-semibold text-foreground">
+                  Fast Analysis
                 </h3>
-                <p className="text-muted-foreground">
-                  Analyze repositories in seconds with our optimized GitHub API integration.
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Quick repository insights with optimized GitHub API integration.
                 </p>
               </div>
             </div>
 
-            <div className="p-6 simple-card">
+            <div className="p-6 modern-card">
               <div className="space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
-                  <Code className="w-6 h-6 text-primary-foreground" />
+                <div className="w-10 h-10 rounded-md border border-foreground/20 flex items-center justify-center">
+                  <Code className="w-5 h-5 text-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">
-                  Deep Analysis
+                <h3 className="text-base font-semibold text-foreground">
+                  Code Insights
                 </h3>
-                <p className="text-muted-foreground">
-                  Get insights into code patterns, contributor activity, and development trends.
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Understand code patterns, contributors, and development trends.
                 </p>
               </div>
             </div>
 
-            <div className="p-6 simple-card">
+            <div className="p-6 modern-card">
               <div className="space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
-                  <Users className="w-6 h-6 text-primary-foreground" />
+                <div className="w-10 h-10 rounded-md border border-foreground/20 flex items-center justify-center">
+                  <Users className="w-5 h-5 text-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">
-                  Team Insights
+                <h3 className="text-base font-semibold text-foreground">
+                  Team Activity
                 </h3>
-                <p className="text-muted-foreground">
-                  Understand team dynamics and individual contributions to the project.
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Track contributions and understand team collaboration patterns.
                 </p>
               </div>
             </div>

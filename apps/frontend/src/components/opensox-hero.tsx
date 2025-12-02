@@ -1,6 +1,5 @@
 'use client';
 
-import { GradientButton } from '@/components/ui/gradient-button';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
@@ -50,15 +49,12 @@ export function OpensoxHero() {
 
           {/* CTA Button */}
           <div className="pt-4">
-            <Link href="/">
-              <GradientButton
-                variant="primary"
-                size="lg"
-                className="gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 border-purple-500/50 shadow-lg shadow-purple-500/25"
-              >
-                Get Started
-                <ArrowRight className="w-5 h-5" />
-              </GradientButton>
+            <Link
+              href="/analyze"
+              className="relative overflow-hidden rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 px-8 py-4 text-lg bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 border border-purple-500/50 text-white shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/30 inline-flex items-center justify-center gap-2"
+            >
+              Get Started
+              <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
         </div>

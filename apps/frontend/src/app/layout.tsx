@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
-import { ThemeToggle } from '@/components/theme-toggle';
+import { Navbar } from '@/components/navbar';
+import { Footer } from '@/components/footer';
 import { ToastProvider } from '@/components/ui/toast';
 
 const inter = Inter({ 
@@ -15,31 +16,31 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'DevStory - GitHub Repository Timeline',
-  description: 'Visualize how a GitHub repository was built step by step. Analyze commit history and development patterns.',
-  keywords: ['github', 'repository', 'timeline', 'development', 'visualization', 'commits'],
-  authors: [{ name: 'DevStory Team' }],
-  creator: 'DevStory',
-  publisher: 'DevStory',
+  title: 'Opensox AI - Find Your Perfect Open-Source Repo',
+  description: 'Find top open-source repos in seconds. Filter by your language, framework, or niche. Start contributing in seconds, not hours.',
+  keywords: ['open source', 'github', 'repository', 'contributions', 'developer tools'],
+  authors: [{ name: 'Opensox AI Team' }],
+  creator: 'Opensox AI',
+  publisher: 'Opensox AI',
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://devstory.app'),
+  metadataBase: new URL('https://opensox.ai'),
   openGraph: {
-    title: 'DevStory - GitHub Repository Timeline',
-    description: 'Visualize how a GitHub repository was built step by step',
-    url: 'https://devstory.app',
-    siteName: 'DevStory',
+    title: 'Opensox AI - Find Your Perfect Open-Source Repo',
+    description: 'Find top open-source repos in seconds. Filter by your language, framework, or niche.',
+    url: 'https://opensox.ai',
+    siteName: 'Opensox AI',
     locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'DevStory - GitHub Repository Timeline',
-    description: 'Visualize how a GitHub repository was built step by step',
-    creator: '@devstory',
+    title: 'Opensox AI - Find Your Perfect Open-Source Repo',
+    description: 'Find top open-source repos in seconds. Filter by your language, framework, or niche.',
+    creator: '@opensoxai',
   },
   robots: {
     index: true,
@@ -60,29 +61,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="dark">
       <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans`}>
-        <div className="relative min-h-screen bg-background flex flex-col">
-          {/* Header - Simple and clean */}
-          <header className="sticky top-0 z-50 w-full border-b bg-background">
-            <div className="flex h-14 items-center justify-between px-6">
-              <div className="flex items-center space-x-3">
-                <h1 className="text-xl font-bold text-foreground">DevStory</h1>
-                <span className="text-sm text-muted-foreground hidden sm:inline">
-                  GitHub Repository Timeline
-                </span>
-              </div>
-              
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-3 text-xs text-muted-foreground">
-                  <span>Ready</span>
-                  <span>•</span>
-                  <span>TypeScript</span>
-                </div>
-                <ThemeToggle />
-              </div>
-            </div>
-          </header>
+        <div className="relative min-h-screen bg-black flex flex-col">
+          <Navbar />
 
           {/* Main Content */}
           <main className="flex-1">
@@ -91,14 +73,7 @@ export default function RootLayout({
             </ToastProvider>
           </main>
 
-          {/* Footer - Simple */}
-          <footer className="border-t bg-background">
-            <div className="px-6 py-4 text-center text-sm text-muted-foreground">
-              <p>
-                Built with ❤️ for developers who love to understand how projects evolve
-              </p>
-            </div>
-          </footer>
+          <Footer />
         </div>
       </body>
     </html>

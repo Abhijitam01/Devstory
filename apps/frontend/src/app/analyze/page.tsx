@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { ModernHero } from '@/components/modern-hero';
+import { ModernAnalyzeForm } from '@/components/modern-analyze-form';
 import { ModernTimeline } from '@/components/modern-timeline';
 const CodebaseInsights = lazy(() => import('@/components/codebase-insights').then(m => ({ default: m.CodebaseInsights })));
-import { GlassCard } from '@/components/ui/glass-card';
-import { GradientButton } from '@/components/ui/gradient-button';
 import { analyzeRepo, checkApiHealth } from '@/lib/api';
 import { AnalyzeResponse, FileChange } from '@devstory/shared';
-import { BarChart3, ArrowLeft, TrendingUp, Github, Clock, Users, Share2 } from 'lucide-react';
+import { BarChart3, ArrowLeft, Share2, X, Sparkles, GitBranch } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 export default function AnalyzePage() {
   const [data, setData] = useState<AnalyzeResponse | null>(null);
@@ -21,7 +21,6 @@ export default function AnalyzePage() {
   const toast = useToast();
 
   useEffect(() => {
-    // Check API health on mount
     const checkHealth = async () => {
       try {
         const isHealthy = await checkApiHealth();
@@ -58,7 +57,6 @@ export default function AnalyzePage() {
   const handlePageChange = async (page: number) => {
     if (!data) return;
     await handleAnalyze(data.repoUrl, undefined, page);
-    // Scroll to top on page change
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -73,7 +71,6 @@ export default function AnalyzePage() {
 
     if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
       navigator.share(shareData).catch(() => {
-        // Fallback to clipboard
         copyToClipboard();
       });
     } else {
@@ -95,7 +92,6 @@ export default function AnalyzePage() {
     if (!data) return;
     
     try {
-      // Extract owner and repo from URL with proper validation
       const urlParts = data.repoUrl.replace('https://github.com/', '').split('/');
       if (urlParts.length < 2) {
         throw new Error('Invalid repository URL format');
@@ -106,7 +102,6 @@ export default function AnalyzePage() {
         throw new Error('Missing owner or repository name');
       }
       
-      // Find the commit that contains this file
       const commit = data.commits.find(c => 
         c.changes.some(change => change.file === file.file)
       );
@@ -123,8 +118,7 @@ export default function AnalyzePage() {
           headers: {
             'Accept': 'application/json',
           },
-          // Add timeout to prevent hanging requests
-          signal: AbortSignal.timeout(30000) // 30 second timeout
+          signal: AbortSignal.timeout(30000)
         }
       );
       
@@ -135,7 +129,6 @@ export default function AnalyzePage() {
       
       const commitDetails = await response.json();
       
-      // Validate response structure
       if (!commitDetails.files || !Array.isArray(commitDetails.files)) {
         throw new Error('Invalid response format from server');
       }
@@ -148,7 +141,6 @@ export default function AnalyzePage() {
         }
         
         if (fileWithContent.content) {
-          // Update the file in the data
           setData(prevData => {
             if (!prevData) return prevData;
             
@@ -175,18 +167,15 @@ export default function AnalyzePage() {
         throw new Error('File not found in commit');
       }
     } catch (error) {
-      // Set user-friendly error message
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch file content';
       setError(`Error loading file content: ${errorMessage}`);
-      
-      // Clear error after 5 seconds
       setTimeout(() => setError(null), 5000);
     }
   };
 
   if (!data) {
     return (
-      <ModernHero 
+      <ModernAnalyzeForm 
         onAnalyze={handleAnalyze}
         isLoading={loading}
         error={error}
@@ -195,50 +184,89 @@ export default function AnalyzePage() {
     );
   }
 
+  const repoName = data.repoUrl.replace('https://github.com/', '');
+
   return (
     <div className="min-h-screen bg-black">
-      <div className="container mx-auto px-6 py-8 space-y-8">
-        {/* Back Button and Share */}
-        <div className="flex items-center justify-between mb-8">
-          <GradientButton
-            variant="ghost"
-            onClick={() => {
-              setData(null);
-              setError(null);
-              setShowInsights(false);
-            }}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Analyze Another Repository
-          </GradientButton>
-          
-          <GradientButton
-            variant="secondary"
-            onClick={handleShare}
-            aria-label="Share analysis results"
-          >
-            <Share2 className="w-4 h-4 mr-2" />
-            Share
-          </GradientButton>
-        </div>
+      {/* Top Bar */}
+      <div className="sticky top-16 z-40 border-b border-white/10 bg-black/80 backdrop-blur-xl">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 gap-4">
+            {/* Repository Info */}
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <Link
+                href="/analyze"
+                className="p-2 rounded-lg hover:bg-white/5 transition-colors group"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setData(null);
+                  setError(null);
+                  setShowInsights(false);
+                }}
+                title="Analyze another repository"
+              >
+                <ArrowLeft className="w-5 h-5 text-white/70 group-hover:text-white transition-colors" />
+              </Link>
+              
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <div className="w-8 h-8 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                  <GitBranch className="w-4 h-4 text-purple-400" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <a
+                    href={data.repoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-medium text-white hover:text-purple-400 transition-colors truncate block"
+                  >
+                    {repoName}
+                  </a>
+                  <div className="text-xs text-white/50">
+                    {data.count} {data.count === 1 ? 'commit' : 'commits'} analyzed
+                  </div>
+                </div>
+              </div>
+            </div>
 
-        {/* Codebase Insights Toggle */}
-        <div className="flex justify-center">
-          <GradientButton
-            variant={showInsights ? "primary" : "secondary"}
-            onClick={() => setShowInsights(!showInsights)}
-            className="mb-8"
-            aria-label={showInsights ? 'Hide codebase insights' : 'Show codebase insights'}
-            aria-expanded={showInsights}
-          >
-            <BarChart3 className="w-4 h-4 mr-2" />
-            {showInsights ? 'Hide' : 'Show'} Codebase Insights
-          </GradientButton>
-        </div>
+            {/* Actions */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowInsights(!showInsights)}
+                className={cn(
+                  'px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+                  'flex items-center gap-2',
+                  showInsights
+                    ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                    : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white border border-white/10'
+                )}
+              >
+                <BarChart3 className="w-4 h-4" />
+                <span className="hidden sm:inline">{showInsights ? 'Hide' : 'Show'} Insights</span>
+              </button>
 
+              <button
+                onClick={handleShare}
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-white/5 text-white/70 hover:bg-white/10 hover:text-white border border-white/10 transition-all duration-200 flex items-center gap-2"
+                aria-label="Share analysis results"
+              >
+                <Share2 className="w-4 h-4" />
+                <span className="hidden sm:inline">Share</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Codebase Insights */}
         {showInsights && data.codebaseStats && (
-          <Suspense fallback={<div className="p-8 text-center">Loading insights...</div>}>
+          <Suspense fallback={
+            <div className="p-8 rounded-xl bg-white/5 border border-white/10 text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-purple-500 border-t-transparent" />
+              <p className="mt-4 text-white/70">Loading insights...</p>
+            </div>
+          }>
             <CodebaseInsights 
               stats={data.codebaseStats} 
               repoUrl={data.repoUrl}
@@ -259,4 +287,3 @@ export default function AnalyzePage() {
     </div>
   );
 }
-

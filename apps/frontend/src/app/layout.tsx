@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { ToastProvider } from '@/components/ui/toast';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -85,7 +86,9 @@ export default function RootLayout({
 
           {/* Main Content */}
           <main className="flex-1">
-            {children}
+            <ToastProvider>
+              {children}
+            </ToastProvider>
           </main>
 
           {/* Footer - Simple */}
